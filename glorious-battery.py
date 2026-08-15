@@ -50,6 +50,10 @@ STATUS_MAP = {
     0xA4: "asleep",
 }
 
+# Nerd Font Material Design "mouse" (U+F037D). Same family as Omarchy
+# Shell's keyboard (󰌌), monitor (󰍹), and microphone (󰍬) bar glyphs.
+MOUSE_GLYPH = "\U000f037d"
+
 
 def _read_sys(path: str) -> str:
     try:
@@ -230,11 +234,9 @@ def emit(payload: dict, args: argparse.Namespace, exit_code: int) -> int:
         if payload.get("ok"):
             percent = payload["percent"]
             state = payload["state"]
-            text = f"{percent}%"
+            text = f"{MOUSE_GLYPH} {percent}%"
             if state == "charging":
-                text = f"{percent}%+"
-            elif state == "full":
-                text = f"{percent}%"
+                text = f"{MOUSE_GLYPH} {percent}%+"
             css = "normal"
             if state in {"missing", "permission", "error"}:
                 css = "critical"
@@ -260,7 +262,7 @@ def emit(payload: dict, args: argparse.Namespace, exit_code: int) -> int:
             print(
                 json.dumps(
                     {
-                        "text": "?",
+                        "text": f"{MOUSE_GLYPH} ?",
                         "tooltip": payload.get("error", "mouse battery unavailable"),
                         "class": "critical",
                         "percentage": 0,

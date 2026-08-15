@@ -174,7 +174,7 @@ Omarchy Quattro’s default bar is `omarchy-shell`, not Waybar. `./install.sh` c
 }
 ```
 
-The reader’s `--waybar` JSON (`text`, `tooltip`, `class`) is what the shell command module consumes.
+The reader’s `--waybar` JSON (`text`, `tooltip`, `class`) is what the shell command module consumes. `text` is the Nerd Font mouse glyph `󰍽` (same Material Design family as Omarchy’s keyboard / monitor / mic icons) plus the percent, so the widget is not mistaken for laptop charge.
 
 ## Waybar (legacy)
 
