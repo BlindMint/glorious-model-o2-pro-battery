@@ -160,11 +160,27 @@ Enabled in Noctalia Settings → Plugins, and added from the bar widget picker. 
 
 Widget settings: refresh interval, show/hide the percent label, hide when disconnected, low-battery warning threshold, path to `glorious-battery.py`.
 
-## Waybar (not used here)
+## Omarchy Quattro bar
+
+Omarchy Quattro’s default bar is `omarchy-shell`, not Waybar. `./install.sh` copies the reader to `~/.config/omarchy/bar/scripts/glorious-battery.py`. The widget is a command module in `~/.config/omarchy/shell.json`, on the right, immediately after the tray:
+
+```json
+{
+  "id": "mouse-battery",
+  "type": "command",
+  "exec": "~/.config/omarchy/bar/scripts/glorious-battery.py --waybar",
+  "interval": 60,
+  "tooltip": "Mouse battery"
+}
+```
+
+The reader’s `--waybar` JSON (`text`, `tooltip`, `class`) is what the shell command module consumes.
+
+## Waybar (legacy)
 
 ```jsonc
 "custom/mouse-battery": {
-    "exec": "/home/samurai/glorious-model-o2-pro-battery/glorious-battery.py --waybar",
+    "exec": "~/.config/omarchy/bar/scripts/glorious-battery.py --waybar",
     "return-type": "json",
     "interval": 60,
     "tooltip": true
@@ -190,5 +206,5 @@ Hold the DPI button. The RGB strips blink a color for a charge band. That is not
 | `noctalia-plugin/plugin.toml` | Plugin manifest (API 3). |
 | `noctalia-plugin/widget.luau` | Bar widget. Polls the reader. |
 | `noctalia-plugin/translations/en.json` | Settings labels. |
-| `install.sh` | Copy the plugin and reader into `~/.local/share/noctalia-bar/noctalia/plugins/`. |
+| `install.sh` | Copy the plugin/reader into Noctalia’s plugin dir and `~/.config/omarchy/bar/scripts/`. |
 | `README.md` | This note. |

@@ -15,15 +15,18 @@ usage() {
   cat <<EOF
 Usage: $(basename "$0") [options]
 
-Install a real copy of the Mouse Battery plugin and glorious-battery.py
-into Noctalia's user plugin directory under ~/.local (no symlink).
+Install copies of the HID reader (no symlink back to this checkout):
+
+  ~/.local/share/noctalia-bar/noctalia/plugins/mouse-battery/   (Noctalia)
+  ~/.config/omarchy/bar/scripts/glorious-battery.py             (Omarchy shell)
 
 Options:
   --udev        Also install the hidraw udev rule (needs sudo)
-  --uninstall   Remove the copied plugin directory
+  --uninstall   Remove the copied plugin/script files
   -h, --help    Show this help
 
-After install, restart Noctalia so it reloads the plugin.
+After a Noctalia install, restart Noctalia. The Omarchy shell command
+module is configured in ~/.config/omarchy/shell.json.
 EOF
 }
 
@@ -55,6 +58,10 @@ plugin_root() {
 
 plugin_dest() {
   printf '%s/%s\n' "$(plugin_root)" "$PLUGIN_DIRNAME"
+}
+
+omarchy_script_dest() {
+  printf '%s/.config/omarchy/bar/scripts/glorious-battery.py\n' "$HOME"
 }
 
 require_sources() {
@@ -105,16 +112,32 @@ install_plugin() {
   printf 'Reader: %s/glorious-battery.py\n' "$dest"
 }
 
+install_omarchy_script() {
+  local dest dest_dir
+  dest=$(omarchy_script_dest)
+  dest_dir=$(dirname -- "$dest")
+  mkdir -p "$dest_dir"
+  cp -- "$src_root/glorious-battery.py" "$dest"
+  chmod 755 "$dest"
+  printf 'Installed Omarchy reader -> %s\n' "$dest"
+}
+
 uninstall_plugin() {
-  local dest
+  local dest omarchy_dest
   dest=$(plugin_dest)
   if [[ ! -e "$dest" && ! -L "$dest" ]]; then
     printf 'Nothing to remove at %s\n' "$dest"
-    return
+  else
+    rm -rf -- "$dest"
+    printf 'Removed %s\n' "$dest"
+    printf 'Disable %s in Noctalia Settings → Plugins if it is still listed.\n' "$PLUGIN_ID"
   fi
-  rm -rf -- "$dest"
-  printf 'Removed %s\n' "$dest"
-  printf 'Disable %s in Noctalia Settings → Plugins if it is still listed.\n' "$PLUGIN_ID"
+
+  omarchy_dest=$(omarchy_script_dest)
+  if [[ -e "$omarchy_dest" || -L "$omarchy_dest" ]]; then
+    rm -f -- "$omarchy_dest"
+    printf 'Removed %s\n' "$omarchy_dest"
+  fi
 }
 
 udev_dest() {
@@ -176,6 +199,7 @@ if [[ "$do_uninstall" == true ]]; then
 fi
 
 install_plugin
+install_omarchy_script
 if [[ "$do_udev" == true ]]; then
   install_udev
 else
