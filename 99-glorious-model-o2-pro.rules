@@ -1,0 +1,9 @@
+# Glorious Model O 2 PRO
+# Copy to /etc/udev/rules.d/ and run:
+#   sudo udevadm control --reload-rules && sudo udevadm trigger
+#
+# 2035 = 4K/8KHz 2.4 GHz receiver
+# 201b = mouse on the USB-C charge cable, and also 1 kHz receiver mode
+
+KERNEL=="hidraw*", ATTRS{idVendor}=="258a", ATTRS{idProduct}=="2035", MODE="0660", GROUP="input", TAG+="uaccess"
+KERNEL=="hidraw*", ATTRS{idVendor}=="258a", ATTRS{idProduct}=="201b", MODE="0660", GROUP="input", TAG+="uaccess"

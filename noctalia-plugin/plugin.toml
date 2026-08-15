@@ -1,0 +1,54 @@
+id = "samurai/mouse-battery"
+name = "Mouse Battery"
+version = "1.0.2"
+plugin_api = 3
+author = "samurai"
+license = "MIT"
+tags = ["battery", "mouse", "glorious"]
+icon = "mouse-2"
+description = "Glorious Model O 2 PRO charge on the bar: percent, discharging, charging, and full."
+
+[[widget]]
+id = "battery"
+entry = "widget.luau"
+
+  [[widget.setting]]
+  key = "interval_seconds"
+  type = "int"
+  label_key = "settings.interval_seconds.label"
+  description_key = "settings.interval_seconds.description"
+  default = 60
+  min = 5
+  max = 600
+  step = 5
+
+  [[widget.setting]]
+  key = "show_label"
+  type = "bool"
+  label_key = "settings.show_label.label"
+  description_key = "settings.show_label.description"
+  default = true
+
+  [[widget.setting]]
+  key = "hide_when_missing"
+  type = "bool"
+  label_key = "settings.hide_when_missing.label"
+  description_key = "settings.hide_when_missing.description"
+  default = false
+
+  [[widget.setting]]
+  key = "warning_threshold"
+  type = "int"
+  label_key = "settings.warning_threshold.label"
+  description_key = "settings.warning_threshold.description"
+  default = 20
+  min = 0
+  max = 100
+  step = 5
+
+  [[widget.setting]]
+  key = "script_path"
+  type = "string"
+  label_key = "settings.script_path.label"
+  description_key = "settings.script_path.description"
+  default = "glorious-battery.py"

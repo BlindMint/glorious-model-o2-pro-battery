@@ -1,0 +1,12 @@
+{
+  "settings.interval_seconds.label": "Refresh interval",
+  "settings.interval_seconds.description": "How often to query the mouse over HID, in seconds.",
+  "settings.show_label.label": "Show percentage",
+  "settings.show_label.description": "Show the numeric charge next to the battery icon.",
+  "settings.hide_when_missing.label": "Hide when disconnected",
+  "settings.hide_when_missing.description": "Hide the widget if the mouse or receiver is not present.",
+  "settings.warning_threshold.label": "Low-battery warning",
+  "settings.warning_threshold.description": "Use the error color at or below this percent while discharging. 0 disables it.",
+  "settings.script_path.label": "Reader script",
+  "settings.script_path.description": "Path to glorious-battery.py. Relative paths are inside the plugin directory. Leave as glorious-battery.py to use the installed copy. ~ is expanded."
+}
