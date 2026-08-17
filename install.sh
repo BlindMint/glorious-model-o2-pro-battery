@@ -25,8 +25,9 @@ Options:
   --uninstall   Remove the copied plugin/script files
   -h, --help    Show this help
 
-After a Noctalia install, restart Noctalia. The Omarchy shell command
-module is configured in ~/.config/omarchy/shell.json.
+After a Noctalia install, restart Noctalia. On Omarchy, this also
+inserts the mouse-battery command module into ~/.config/omarchy/shell.json
+(right section, immediately after the tray) if it is missing.
 EOF
 }
 
@@ -62,6 +63,106 @@ plugin_dest() {
 
 omarchy_script_dest() {
   printf '%s/.config/omarchy/bar/scripts/glorious-battery.py\n' "$HOME"
+}
+
+omarchy_shell_json() {
+  printf '%s/.config/omarchy/shell.json\n' "$HOME"
+}
+
+# Insert or remove the Omarchy command module in shell.json.
+# $1 = insert | remove
+# Keeps other bar customizations (clock format, idle, plugins) intact.
+omarchy_bar_widget() {
+  local action shell_json
+  action=$1
+  shell_json=$(omarchy_shell_json)
+
+  if [[ ! -f "$shell_json" ]]; then
+    printf 'No Omarchy shell.json at %s; skipping bar widget.\n' "$shell_json"
+    return 0
+  fi
+
+  command -v python3 >/dev/null 2>&1 || die "python3 is required to update $shell_json"
+
+  python3 - "$action" "$shell_json" <<'PY'
+import json
+import os
+import sys
+
+action, path = sys.argv[1], sys.argv[2]
+widget_id = "mouse-battery"
+widget = {
+    "id": widget_id,
+    "type": "command",
+    "exec": "~/.config/omarchy/bar/scripts/glorious-battery.py --waybar",
+    "interval": 60,
+    "tooltip": "Mouse battery",
+}
+
+with open(path, encoding="utf-8") as fh:
+    try:
+        data = json.load(fh)
+    except json.JSONDecodeError as exc:
+        raise SystemExit(f"invalid JSON in {path}: {exc}") from exc
+
+if not isinstance(data, dict):
+    raise SystemExit(f"{path} is not a JSON object")
+
+layout = data.setdefault("bar", {}).setdefault("layout", {})
+if not isinstance(layout, dict):
+    raise SystemExit(f"{path} bar.layout is not an object")
+
+changed = False
+
+
+def iter_sections():
+    for name, items in layout.items():
+        if isinstance(items, list):
+            yield name, items
+
+
+def find_widget():
+    for name, items in iter_sections():
+        for index, item in enumerate(items):
+            if isinstance(item, dict) and item.get("id") == widget_id:
+                return name, items, index
+    return None, None, None
+
+
+section, items, index = find_widget()
+
+if action == "insert":
+    if section is not None:
+        print(f"Omarchy bar widget already present ({section}[{index}]) in {path}")
+    else:
+        right = layout.setdefault("right", [])
+        if not isinstance(right, list):
+            raise SystemExit(f"{path} bar.layout.right is not an array")
+        insert_at = 0
+        for i, item in enumerate(right):
+            if isinstance(item, dict) and item.get("id") == "omarchy.tray":
+                insert_at = i + 1
+                break
+        right.insert(insert_at, widget)
+        changed = True
+        print(f"Inserted {widget_id} after the tray in {path}")
+elif action == "remove":
+    if section is None:
+        print(f"Omarchy bar widget not present in {path}")
+    else:
+        items.pop(index)
+        changed = True
+        print(f"Removed {widget_id} from {path}")
+else:
+    raise SystemExit(f"unknown bar-widget action: {action}")
+
+if changed:
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as fh:
+        json.dump(data, fh, indent=2)
+        fh.write("\n")
+    os.replace(tmp, path)
+PY
 }
 
 require_sources() {
@@ -138,6 +239,8 @@ uninstall_plugin() {
     rm -f -- "$omarchy_dest"
     printf 'Removed %s\n' "$omarchy_dest"
   fi
+
+  omarchy_bar_widget remove
 }
 
 udev_dest() {
@@ -200,6 +303,7 @@ fi
 
 install_plugin
 install_omarchy_script
+omarchy_bar_widget insert
 if [[ "$do_udev" == true ]]; then
   install_udev
 else
@@ -210,4 +314,6 @@ cat <<EOF
 
 Restart Noctalia so it reloads the plugin (quit the bar and start noctalia-bar again).
 The plugin is already enabled as ${PLUGIN_ID} if you used it before.
+The Omarchy bar widget is in ~/.config/omarchy/shell.json (after the tray).
+The shell hot-reloads that file; run omarchy restart shell if it does not appear.
 EOF
